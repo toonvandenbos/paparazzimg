@@ -1,0 +1,37 @@
+{
+
+      "tasks" : {
+            "default": [
+                  "build:js",
+                  "watch"
+            ],
+            "clean": ["clean:js"],
+            "build": ["build:js"],
+            "watch": ["watch:js"]
+      },
+
+      "scripts": {
+            "files": [
+                  {
+                        "src": [
+                              "src/front.js",
+                              "src/*.js"
+                        ],
+                        "dist": "build/",
+                        "filename": "paparazzimg.js",
+                        "minfilename": "paparazzimg.min.js"
+                  }
+            ],
+            "options": {
+                  "jshint": {
+                        "lookup" : true
+                  },
+                  "uglify": {
+                        "preserveComments": "some"
+                  }
+            },
+            "watch": [
+                  "src/**/*.js"
+            ]
+      }
+}
