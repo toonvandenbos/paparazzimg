@@ -17,7 +17,8 @@ paparazzimg.canvas = function( tracker, mode ) {
             baseLine: 4
       };
 
-      this.init = function(el) {
+      this.init = function() {
+            console.log(tracker.breaks);
             this.makeName();
             this.makeCanvas();
             this.drawBase();
@@ -92,10 +93,11 @@ paparazzimg.canvas = function( tracker, mode ) {
       };
 
       this.adjustModeSize = function(type, o) {
+            var m = { width: o.width, height: o.height, ratio: o.ratio};
             switch(this.mode){
-                  case 'fluidWidth': return this.adjustFluidWidth(type, o); break;
-                  case 'fluidHeight': return this.adjustFluidHeight(type, o); break;
-                  default: return o; break;
+                  case 'fluidWidth': return this.adjustFluidWidth(type, m); break;
+                  case 'fluidHeight': return this.adjustFluidHeight(type, m); break;
+                  default: return m; break;
             }
       };
 
@@ -108,7 +110,6 @@ paparazzimg.canvas = function( tracker, mode ) {
       this.adjustFluidHeight = function(type, o) {
             o.height = this.canvas.height;
             if(type != 'always') o.width = o.ratio * o.height;
-            console.log(type, o);
             return o;
       };
 
