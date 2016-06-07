@@ -116,8 +116,10 @@ paparazzimg.tracker = function(el) {
       //    API
 
       this.report = function() {
-            console.log(this.points);
-            console.log('TODO : generate tracker report');
+            var o = {};
+            o.count = this.points.length;
+            o.extremum = this.getExtremum();
+            return o;
       };
 
       this.point = function() {
@@ -132,6 +134,18 @@ paparazzimg.tracker = function(el) {
             p.height = this.element.clientHeight;
             p.ratio = p.width / p.height;
             return p;
+      };
+
+      this.getExtremum = function() {
+            var o = {}, i, d;
+            for (i = 0; i < this.points.length; i++) {
+                  for (d in this.points[i]){
+                        if(o[d] === undefined) o[d] = { min: this.points[i][d], max: this.points[i][d] };
+                        else if(this.points[i][d] > o[d].max) o[d].max = this.points[i][d];
+                        else if(this.points[i][d] < o[d].min) o[d].min = this.points[i][d];
+                  }
+            }
+            return o;
       };
 
       this.init(el);
