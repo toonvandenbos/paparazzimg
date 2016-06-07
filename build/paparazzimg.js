@@ -33,8 +33,10 @@ var paparazzimg = (function(p) {
       };
 
       p.download = function(mode, id) {
-            if(id == undefined) return downloadAll(mode);
-            return downloadTracker(id, mode);
+            var a;
+            if(id == undefined) a = downloadAll(mode);
+            else a = downloadTracker(id, mode);
+            for (var i = 0; i < a.length; i++) a[i].download();
       };
 
       function registerEvent() {
@@ -125,6 +127,7 @@ paparazzimg.canvas = function( tracker, mode ) {
       this.file = null;
       this.canvas = null;
       this.ctx = null;
+      this.link = null;
       this.conf = {
             colors: {
                   base: {r: 63, g: 74, b: 78, a: 1},
@@ -143,7 +146,7 @@ paparazzimg.canvas = function( tracker, mode ) {
             this.makeCanvas();
             this.drawBase();
             this.drawBreaks();
-            document.body.appendChild(this.canvas);
+            this.makeDownloadLink();
       };
 
       this.makeName = function() {
@@ -158,6 +161,24 @@ paparazzimg.canvas = function( tracker, mode ) {
             this.ctx = this.canvas.getContext('2d');
             this.ctx.lineJoin = "round";
             this.ctx.lineCap = "round";
+      };
+
+      this.makeDownloadLink = function() {
+            this.link = document.createElement('a');
+            this.link.addEventListener('click',(function(self){return function(e){self.event_download(e)}})(this),false);
+      };
+
+      //    API
+
+      this.download = function() {
+            this.link.click();
+      };
+
+      //    EVENT
+
+      this.event_download = function() {
+            this.link.href = this.canvas.toDataURL();
+            this.link.download = this.file;
       };
 
       //    DRAW

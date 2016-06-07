@@ -33,8 +33,10 @@ var paparazzimg = (function(p) {
       };
 
       p.download = function(mode, id) {
-            if(id == undefined) return downloadAll(mode);
-            return downloadTracker(id, mode);
+            var a;
+            if(id == undefined) a = downloadAll(mode);
+            else a = downloadTracker(id, mode);
+            for (var i = 0; i < a.length; i++) a[i].download();
       };
 
       function registerEvent() {
