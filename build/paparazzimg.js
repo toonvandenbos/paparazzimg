@@ -32,6 +32,11 @@ var paparazzimg = (function(p) {
             addAllPoints();
       };
 
+      p.download = function(mode, id) {
+            if(id == undefined) return downloadAll(mode);
+            return downloadTracker(id, mode);
+      };
+
       function registerEvent() {
             window.addEventListener('resize', p.addTrackpoint, false);
       };
@@ -80,17 +85,105 @@ var paparazzimg = (function(p) {
             for(var id in oTrackers) addTrackerPoint(id);
       };
 
+      function downloadTracker(id, mode) {
+            var a = [];
+            if(oTrackers[id].isActive) stopTracker(id);
+            if(mode === undefined || oTrackers[id].output.optimal[mode] === undefined){
+                  for (mode in oTrackers[id].output.optimal) {
+                        a.push( new p.canvas(oTrackers[id], mode) );
+                  }
+            }
+            else a.push( new p.canvas(oTrackers[id], mode) );
+            return a;
+      };
+
+      function downloadAll(mode) {
+            var a = [], tmp, id;
+            for(id in oTrackers){
+                  tmp = downloadTracker(id, mode);
+                  for (var i = 0; i < tmp.length; i++) {
+                        a.push(tmp[i]);
+                  }
+            }
+            return a;
+      };
+
       registerEvent();
 
       return p;
 
 })(paparazzimg || {});
+paparazzimg.canvas = function( tracker, mode ) {
+
+      this.mode = null;
+      this.file = null;
+      this.canvas = null;
+      this.ctx = null;
+      this.conf = {
+            colors: {
+                  base: {r: 63, g: 74, b: 78, a: 1},
+                  baseBg: {r: 198, g: 214, b: 220, a: 0.2},
+                  always: {r: 149, g: 202, b: 128, a: 1}
+            },
+            line: 1.5,
+            baseLine: 4.5
+      };
+
+      this.init = function(el) {
+            this.makeName();
+            this.makeCanvas();
+            this.drawBase();
+            document.body.appendChild(this.canvas);
+      };
+
+      this.makeName = function() {
+            this.mode = mode;
+            this.file = tracker.id + '-' + this.mode + '.png';
+      };
+
+      this.makeCanvas = function() {
+            this.canvas = document.createElement('canvas');
+            this.canvas.width = tracker.output.optimal[mode].width;
+            this.canvas.height = tracker.output.optimal[mode].height;
+            this.ctx = this.canvas.getContext('2d');
+            this.ctx.lineJoin = "round";
+            this.ctx.lineCap = "round";
+      };
+
+      //    DRAW
+
+      this.drawBase = function() {
+            this.ctx.lineWidth = this.conf.baseLine;
+            this.ctx.strokeStyle = this.getRgba(this.conf.colors.base);
+            this.ctx.fillStyle = this.getRgba(this.conf.colors.baseBg);
+            this.ctx.beginPath();
+            this.ctx.rect((this.conf.baseLine/2),(this.conf.baseLine/2),(this.canvas.width - this.conf.baseLine),(this.canvas.height - this.conf.baseLine));
+            this.ctx.fill();
+            this.ctx.moveTo(this.conf.baseLine,this.conf.baseLine);
+            this.ctx.lineTo((this.canvas.width - this.conf.baseLine),(this.canvas.height - this.conf.baseLine));
+            this.ctx.moveTo(this.conf.baseLine,(this.canvas.height - this.conf.baseLine));
+            this.ctx.lineTo((this.canvas.width - this.conf.baseLine),this.conf.baseLine);
+            this.ctx.stroke();
+      };
+
+      //    FUNCTIONS
+
+      this.getRgba = function(o) {
+            return 'rgba('
+                  + o.r + ','
+                  + o.g + ','
+                  + o.b + ','
+                  + o.a + ')';
+      };
+
+      this.init();
+};
 paparazzimg.tracker = function(el) {
 
       this.element = null;
       this.id = null;
       this.points = [];
-      this.report = null;
+      this.output = null;
       this.breaks = null;
       this.isActive = false;
 
@@ -118,12 +211,11 @@ paparazzimg.tracker = function(el) {
       //    API
 
       this.report = function() {
-            this.makeBaseBreaks();
-            this.makeReport();
+            this.breaks = [];
+            this.makeOutput();
             this.addMinBreak();
             this.reset();
-            console.log(this.breaks);
-            return this.report;
+            return this.output;
       };
 
       this.point = function() {
@@ -144,11 +236,11 @@ paparazzimg.tracker = function(el) {
             return p;
       };
 
-      this.makeReport = function() {
-            this.report = {};
-            this.report.count = this.points.length;
-            this.report.extremum = this.getExtremum();
-            this.report.optimal = this.getOptimal();
+      this.makeOutput = function() {
+            this.output = {};
+            this.output.count = this.points.length;
+            this.output.extremum = this.getExtremum();
+            this.output.optimal = this.getOptimal();
       };
 
       this.getExtremum = function() {
@@ -183,28 +275,23 @@ paparazzimg.tracker = function(el) {
 
       this.getStaticSize = function() {
             return {
-                  width: Math.ceil(this.report.extremum.width.max),
-                  height: Math.ceil(this.report.extremum.height.max)
+                  width: Math.ceil(this.output.extremum.width.max),
+                  height: Math.ceil(this.output.extremum.height.max)
             };
       };
 
       this.getFluidWidthSize = function() {
             return {
-                  width: Math.ceil(this.report.extremum.height.max * this.report.extremum.ratio.max),
-                  height: Math.ceil(this.report.extremum.width.max / this.report.extremum.ratio.min)
+                  width: Math.ceil(this.output.extremum.height.max * this.output.extremum.ratio.max),
+                  height: Math.ceil(this.output.extremum.width.max / this.output.extremum.ratio.min)
             };
       };
 
       this.getFluidHeightSize = function() {
             return {
-                  width: Math.ceil(this.report.extremum.height.min * this.report.extremum.ratio.max),
-                  height: Math.ceil(this.report.extremum.width.min / this.report.extremum.ratio.min)
+                  width: Math.ceil(this.output.extremum.height.min * this.output.extremum.ratio.max),
+                  height: Math.ceil(this.output.extremum.width.min / this.output.extremum.ratio.min)
             };
-      };
-
-      this.makeBaseBreaks = function() {
-            this.breaks = [];
-            this.addBreak('base', null, null);
       };
 
       this.addBreak = function(type, x, y) {
@@ -225,7 +312,7 @@ paparazzimg.tracker = function(el) {
       };
 
       this.addMinBreak = function() {
-            this.addBreak('always', this.report.extremum.width.min, this.report.extremum.height.min);
+            this.addBreak('always', this.output.extremum.width.min, this.output.extremum.height.min);
       };
 
       this.init(el);

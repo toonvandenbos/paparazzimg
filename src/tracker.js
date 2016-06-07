@@ -3,7 +3,7 @@ paparazzimg.tracker = function(el) {
       this.element = null;
       this.id = null;
       this.points = [];
-      this.report = null;
+      this.output = null;
       this.breaks = null;
       this.isActive = false;
 
@@ -31,12 +31,11 @@ paparazzimg.tracker = function(el) {
       //    API
 
       this.report = function() {
-            this.makeBaseBreaks();
-            this.makeReport();
+            this.breaks = [];
+            this.makeOutput();
             this.addMinBreak();
             this.reset();
-            console.log(this.breaks);
-            return this.report;
+            return this.output;
       };
 
       this.point = function() {
@@ -57,11 +56,11 @@ paparazzimg.tracker = function(el) {
             return p;
       };
 
-      this.makeReport = function() {
-            this.report = {};
-            this.report.count = this.points.length;
-            this.report.extremum = this.getExtremum();
-            this.report.optimal = this.getOptimal();
+      this.makeOutput = function() {
+            this.output = {};
+            this.output.count = this.points.length;
+            this.output.extremum = this.getExtremum();
+            this.output.optimal = this.getOptimal();
       };
 
       this.getExtremum = function() {
@@ -96,28 +95,23 @@ paparazzimg.tracker = function(el) {
 
       this.getStaticSize = function() {
             return {
-                  width: Math.ceil(this.report.extremum.width.max),
-                  height: Math.ceil(this.report.extremum.height.max)
+                  width: Math.ceil(this.output.extremum.width.max),
+                  height: Math.ceil(this.output.extremum.height.max)
             };
       };
 
       this.getFluidWidthSize = function() {
             return {
-                  width: Math.ceil(this.report.extremum.height.max * this.report.extremum.ratio.max),
-                  height: Math.ceil(this.report.extremum.width.max / this.report.extremum.ratio.min)
+                  width: Math.ceil(this.output.extremum.height.max * this.output.extremum.ratio.max),
+                  height: Math.ceil(this.output.extremum.width.max / this.output.extremum.ratio.min)
             };
       };
 
       this.getFluidHeightSize = function() {
             return {
-                  width: Math.ceil(this.report.extremum.height.min * this.report.extremum.ratio.max),
-                  height: Math.ceil(this.report.extremum.width.min / this.report.extremum.ratio.min)
+                  width: Math.ceil(this.output.extremum.height.min * this.output.extremum.ratio.max),
+                  height: Math.ceil(this.output.extremum.width.min / this.output.extremum.ratio.min)
             };
-      };
-
-      this.makeBaseBreaks = function() {
-            this.breaks = [];
-            this.addBreak('base', null, null);
       };
 
       this.addBreak = function(type, x, y) {
@@ -138,7 +132,7 @@ paparazzimg.tracker = function(el) {
       };
 
       this.addMinBreak = function() {
-            this.addBreak('always', this.report.extremum.width.min, this.report.extremum.height.min);
+            this.addBreak('always', this.output.extremum.width.min, this.output.extremum.height.min);
       };
 
       this.init(el);

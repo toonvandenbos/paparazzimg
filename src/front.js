@@ -32,6 +32,11 @@ var paparazzimg = (function(p) {
             addAllPoints();
       };
 
+      p.download = function(mode, id) {
+            if(id == undefined) return downloadAll(mode);
+            return downloadTracker(id, mode);
+      };
+
       function registerEvent() {
             window.addEventListener('resize', p.addTrackpoint, false);
       };
@@ -78,6 +83,29 @@ var paparazzimg = (function(p) {
 
       function addAllPoints() {
             for(var id in oTrackers) addTrackerPoint(id);
+      };
+
+      function downloadTracker(id, mode) {
+            var a = [];
+            if(oTrackers[id].isActive) stopTracker(id);
+            if(mode === undefined || oTrackers[id].output.optimal[mode] === undefined){
+                  for (mode in oTrackers[id].output.optimal) {
+                        a.push( new p.canvas(oTrackers[id], mode) );
+                  }
+            }
+            else a.push( new p.canvas(oTrackers[id], mode) );
+            return a;
+      };
+
+      function downloadAll(mode) {
+            var a = [], tmp, id;
+            for(id in oTrackers){
+                  tmp = downloadTracker(id, mode);
+                  for (var i = 0; i < tmp.length; i++) {
+                        a.push(tmp[i]);
+                  }
+            }
+            return a;
       };
 
       registerEvent();
