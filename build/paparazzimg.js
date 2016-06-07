@@ -86,12 +86,18 @@ var paparazzimg = (function(p) {
       };
 
       function downloadTracker(id, mode) {
-            var a = [];
+            var a = [], s;
             if(oTrackers[id].isActive) stopTracker(id);
-            if(mode === undefined || oTrackers[id].output.optimal[mode] === undefined){
+            if(mode === undefined){
                   for (mode in oTrackers[id].output.optimal) {
                         a.push( new p.canvas(oTrackers[id], mode) );
                   }
+            }
+            else if(oTrackers[id].output.optimal[mode] === undefined){
+                  s = 'Paparazzimg: mode "' + mode + '" is not a defined render mode (defined modes are:';
+                  for (mode in oTrackers[id].output.optimal) s = s + ' "' + mode + '",';
+                  s = s.slice(0, -1) + ').';
+                  console.error(s);
             }
             else a.push( new p.canvas(oTrackers[id], mode) );
             return a;
