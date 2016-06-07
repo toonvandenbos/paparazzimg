@@ -31,6 +31,7 @@ paparazzimg.tracker = function(el) {
       //    API
 
       this.report = function() {
+            if(!this.points.length) return null;
             this.breaks = {};
             this.makeOutput();
             this.addMinBreak();
@@ -39,7 +40,8 @@ paparazzimg.tracker = function(el) {
       };
 
       this.point = function() {
-            this.points.push( this.getPoint() );
+            var p = this.getPoint();
+            if(p) this.points.push(p);
       };
 
       this.reset = function() {
@@ -52,6 +54,7 @@ paparazzimg.tracker = function(el) {
             var p = {};
             p.width = this.element.clientWidth;
             p.height = this.element.clientHeight;
+            if(!p.width || !p.height) return false;
             p.ratio = p.width / p.height;
             return p;
       };

@@ -18,7 +18,6 @@ paparazzimg.canvas = function( tracker, mode ) {
       };
 
       this.init = function() {
-            console.log(tracker.breaks);
             this.makeName();
             this.makeCanvas();
             this.drawBase();
