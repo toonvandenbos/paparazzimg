@@ -32,11 +32,17 @@ paparazzimg.tracker = function(el) {
             var o = {};
             o.count = this.points.length;
             o.extremum = this.getExtremum();
+            o.optimal = this.getOptimal(o.extremum);
+            this.reset();
             return o;
       };
 
       this.point = function() {
             this.points.push( this.getPoint() );
+      };
+
+      this.reset = function() {
+            this.points = [];
       };
 
       //    FUNCTIONS
@@ -59,6 +65,35 @@ paparazzimg.tracker = function(el) {
                   }
             }
             return o;
+      };
+
+      this.getOptimal = function(oExtremum) {
+            var o = {};
+            o.static = this.getStaticSize(oExtremum);
+            o.fluidWidth = this.getFluidWidthSize(oExtremum);
+            o.fluidHeight = this.getFluidHeightSize(oExtremum);
+            return o;
+      };
+
+      this.getStaticSize = function(oExtremum) {
+            return {
+                  width: Math.ceil(oExtremum.width.max),
+                  height: Math.ceil(oExtremum.height.max)
+            };
+      };
+
+      this.getFluidWidthSize = function(oExtremum) {
+            return {
+                  width: Math.ceil(oExtremum.height.max * oExtremum.ratio.max),
+                  height: Math.ceil(oExtremum.width.max / oExtremum.ratio.min)
+            };
+      };
+
+      this.getFluidHeightSize = function(oExtremum) {
+            return {
+                  width: Math.ceil(oExtremum.height.min * oExtremum.ratio.max),
+                  height: Math.ceil(oExtremum.width.min / oExtremum.ratio.min)
+            };
       };
 
       this.init(el);
