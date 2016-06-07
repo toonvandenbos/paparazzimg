@@ -125,18 +125,8 @@ paparazzimg.canvas = function( tracker, mode ) {
                   baseBg: {r: 198, g: 214, b: 220, a: 0.2},
                   always: {r: 149, g: 202, b: 128, a: 1},
                   alwaysBg: {r: 149, g: 202, b: 128, a: 0.4},
-                  minwidth: {r: 180, g: 180, b: 180, a: 1},
-                  minwidthBg: {r: 180, g: 180, b: 180, a: 0.1},
-                  maxwidth: {r: 190, g: 190, b: 190, a: 1},
-                  maxwidthBg: {r: 190, g: 190, b: 190, a: 0.1},
-                  minheight: {r: 200, g: 200, b: 200, a: 1},
-                  minheightBg: {r: 200, g: 200, b: 200, a: 0.1},
-                  maxheight: {r: 210, g: 210, b: 210, a: 1},
-                  maxheightBg: {r: 210, g: 210, b: 210, a: 0.1},
-                  minratio: {r: 220, g: 220, b: 220, a: 1},
-                  minratioBg: {r: 220, g: 220, b: 220, a: 0.1},
-                  maxratio: {r: 230, g: 230, b: 230, a: 1},
-                  maxratioBg: {r: 230, g: 230, b: 230, a: 0.1},
+                  normal: {r: 180, g: 180, b: 180, a: 1},
+                  normalBg: {r: 180, g: 180, b: 180, a: 0.1}
             },
             line: 1,
             baseLine: 4
@@ -181,15 +171,17 @@ paparazzimg.canvas = function( tracker, mode ) {
       };
 
       this.drawBreaks = function() {
-            for (var t in tracker.breaks) {
-                  this.drawBreak(t, tracker.breaks[t]);
+            var t, c;
+            for (t in tracker.breaks) {
+                  c = this.conf.colors[t.replace('-','')] === undefined ? 'normal' : t.replace('-','');
+                  this.drawBreak(c, this.adjustModeSize(t, tracker.breaks[t]));
             }
       };
 
-      this.drawBreak = function(type, o) {
+      this.drawBreak = function(color, o) {
             this.ctx.lineWidth = this.conf.line;
-            this.ctx.strokeStyle = this.getRgba(this.conf.colors[type.replace('-','')]);
-            this.ctx.fillStyle = this.getRgba(this.conf.colors[type.replace('-','') + 'Bg']);
+            this.ctx.strokeStyle = this.getRgba(this.conf.colors[color]);
+            this.ctx.fillStyle = this.getRgba(this.conf.colors[color + 'Bg']);
             this.ctx.beginPath();
             this.ctx.rect(this.getPX(o.width),this.getPY(o.height),o.width,o.height);
             this.ctx.fill();
@@ -212,6 +204,27 @@ paparazzimg.canvas = function( tracker, mode ) {
 
       this.getPY = function(i) {
             return (this.canvas.height - i)/2;
+      };
+
+      this.adjustModeSize = function(type, o) {
+            switch(this.mode){
+                  case 'fluidWidth': return this.adjustFluidWidth(type, o); break;
+                  case 'fluidHeight': return this.adjustFluidHeight(type, o); break;
+                  default: return o; break;
+            }
+      };
+
+      this.adjustFluidWidth = function(type, o) {
+            o.width = this.canvas.width;
+            if(type != 'always') o.height = (o.width/o.ratio);
+            return o;
+      };
+
+      this.adjustFluidHeight = function(type, o) {
+            o.height = this.canvas.height;
+            if(type != 'always') o.width = o.ratio * o.height;
+            console.log(type, o);
+            return o;
       };
 
       this.init();
@@ -332,10 +345,11 @@ paparazzimg.tracker = function(el) {
             };
       };
 
-      this.addBreak = function(type, x, y) {
+      this.addBreak = function(type, x, y, r) {
             var o = {};
             o.width = (x > 0 || x === 0) ? x : null;
             o.height = (y > 0 || y === 0) ? y : null;
+            o.ratio = r;
             this.breaks[type] = o;
       };
 
@@ -343,13 +357,13 @@ paparazzimg.tracker = function(el) {
             var d, m;
             for (d in o) {
                   for(m in o[d]){
-                        this.addBreak(m + '-' + d, o[d][m].width, o[d][m].height);
+                        this.addBreak(m + '-' + d, o[d][m].width, o[d][m].height, o[d][m].ratio);
                   }
             }
       };
 
       this.addMinBreak = function() {
-            this.addBreak('always', this.output.extremum.width.min, this.output.extremum.height.min);
+            this.addBreak('always', this.output.extremum.width.min, this.output.extremum.height.min, null);
       };
 
       this.init(el);

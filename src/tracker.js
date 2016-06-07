@@ -114,10 +114,11 @@ paparazzimg.tracker = function(el) {
             };
       };
 
-      this.addBreak = function(type, x, y) {
+      this.addBreak = function(type, x, y, r) {
             var o = {};
             o.width = (x > 0 || x === 0) ? x : null;
             o.height = (y > 0 || y === 0) ? y : null;
+            o.ratio = r;
             this.breaks[type] = o;
       };
 
@@ -125,13 +126,13 @@ paparazzimg.tracker = function(el) {
             var d, m;
             for (d in o) {
                   for(m in o[d]){
-                        this.addBreak(m + '-' + d, o[d][m].width, o[d][m].height);
+                        this.addBreak(m + '-' + d, o[d][m].width, o[d][m].height, o[d][m].ratio);
                   }
             }
       };
 
       this.addMinBreak = function() {
-            this.addBreak('always', this.output.extremum.width.min, this.output.extremum.height.min);
+            this.addBreak('always', this.output.extremum.width.min, this.output.extremum.height.min, null);
       };
 
       this.init(el);
