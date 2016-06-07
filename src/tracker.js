@@ -31,7 +31,7 @@ paparazzimg.tracker = function(el) {
       //    API
 
       this.report = function() {
-            this.breaks = [];
+            this.breaks = {};
             this.makeOutput();
             this.addMinBreak();
             this.reset();
@@ -116,10 +116,9 @@ paparazzimg.tracker = function(el) {
 
       this.addBreak = function(type, x, y) {
             var o = {};
-            o.type = type;
             o.width = (x > 0 || x === 0) ? x : null;
             o.height = (y > 0 || y === 0) ? y : null;
-            this.breaks.push(o);
+            this.breaks[type] = o;
       };
 
       this.addExtremumBreaks = function(o) {
