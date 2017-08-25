@@ -112,8 +112,8 @@ paparazzimg.tracker = function(el) {
 
       this.getFluidHeightSize = function() {
             return {
-                  width: Math.ceil(this.output.extremum.height.min * this.output.extremum.ratio.max),
-                  height: Math.ceil(this.output.extremum.width.min / this.output.extremum.ratio.min)
+                  width: Math.ceil(this.output.extremum.height.max * this.output.extremum.ratio.max),
+                  height: Math.ceil(this.output.extremum.height.max)
             };
       };
 
